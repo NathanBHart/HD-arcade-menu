@@ -82,7 +82,7 @@ def read_file(file):
 
     return x
 
-def display_text(text, location, level = 1, color = BLACK, character_max = 50):
+def display_text(text, location, level = 1, color = BLACK, character_max = 100):
 
     text_level = text_p
     new_line = 30
@@ -106,6 +106,56 @@ def display_text(text, location, level = 1, color = BLACK, character_max = 50):
             DISPLAYSURF.blit(textsurface, (location[0], location[1] + new_line * i))
 
     return int(math.ceil(len(text)/character_max))
+
+# Used and updated from PyGame documentation
+# draw some text into an area of a surface
+# automatically wraps words
+# returns any text that didn't get blitted
+def display_text_box(text, rect, color = BLACK, font = text_h1, aa=False, bkg=None, restrict = False, surface = DISPLAYSURF):
+    rect = Rect(rect)
+    y = rect.top
+    line_spacing = -2
+
+    # get the height of the font
+    font_height = font.size("Tg")[1]
+
+    while text:
+
+        i = 1
+
+        # determine if the row of text will be outside our area
+        # Restrict allows this option to be disabled
+        if y + font_height > rect.bottom and restrict:
+            break
+
+        # determine maximum width of line
+        while font.size(text[:i])[0] < rect.width and i < len(text):
+            i += 1
+
+        # if we've wrapped the text, then adjust the wrap to the last word
+        if i < len(text):
+
+            for j in range(i):
+                if text[j] == " ":
+                    i = j + 1
+
+        # render the line and blit it to the surface
+        if bkg:
+            image = font.render(text[:i], 1, color, bkg)
+            image.set_colorkey(bkg)
+        else:
+            image = font.render(text[:i], aa, color)
+
+        surface.blit(image, (rect.left, y))
+        y += font_height + line_spacing
+
+        # remove the text we just blitted
+        text = text[i:]
+
+    return y
+
+
+
 
 def card_display(location, width, height, color = WHITE):
 
@@ -158,15 +208,15 @@ def background_update(image = True):
 
                 DISPLAYSURF.blit(scaled_background_image, (0,0))
 
-
-
 def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
 
     global background_link
 
-    side = CARD_WIDTH  # / (abs(position) + 1)
-    top = CARD_HEIGHT  # / (abs(position) + 1)
-    top_corner = (CARD_SIDE_MARGIN + (side + 60) * (position), CARD_TOP_MARGIN)
+    depth_scale = 10
+
+    side = CARD_WIDTH / ((abs(position)/depth_scale) + 1)  # / (abs(position) + 1)
+    top = CARD_HEIGHT / ((abs(position)/depth_scale) + 1)  # / (abs(position) + 1)
+    top_corner = (CARD_SIDE_MARGIN + (CARD_WIDTH + 60) * (position), (DISPLAYSURF.get_height()-top)/2)
 
     if position >= -2 and position <= 2:
 
@@ -185,8 +235,8 @@ def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
 
                 bg_img = "Resources/originals/game_images/" + file[id][2]
 
-                next_line = display_text(file[id][0], (top_corner[0] + 80, top_corner[1] + 80), 1, WHITE, int(CARD_WIDTH/70)) # TODO Fix text to screen ratio
-                display_text(file[id][1], (top_corner[0] + 80, top_corner[1] + 80 + 80 * next_line), 4, WHITE, int(CARD_WIDTH/18))
+                next_line = display_text_box(file[id][0], (top_corner[0] + 80, top_corner[1] + 80, CARD_WIDTH - 160, CARD_HEIGHT -160), WHITE, text_h1) # TODO Fix text to screen ratio
+                display_text_box(file[id][1], (top_corner[0] + 80, next_line + 30, CARD_WIDTH - 160, CARD_HEIGHT - 160), WHITE, text_p, aa = True)
 
             else:
 
@@ -230,10 +280,8 @@ while main_loop:
         if event.type == QUIT:
             main_loop = False
 
-    menu_card("Original_Game", 0 + i, 0)
-    menu_card("Original_Game", 2 + i, 0)
-    menu_card("Original_Game", 1 + i, 1)
-
-    i -= 0.01
+    menu_card("Original_Game", 0, 0)
+    menu_card("Original_Game", 2, 0)
+    menu_card("Original_Game", 1, 1)
 
     pygame.display.update()
