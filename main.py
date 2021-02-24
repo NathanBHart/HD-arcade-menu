@@ -5,19 +5,25 @@ import math
 pygame.init()
 pygame.font.init()
 
+# Display Constants
 DISPLAYSURF = pygame.display.set_mode((0,0), FULLSCREEN)
+DISPLAY_WIDTH = DISPLAYSURF.get_width()
+DISPLAY_HEIGHT = DISPLAYSURF.get_height()
+IDEAL_PIXEL_COUNT = (1280 * 720) ** (1/2)
+IDEAL_PIXEL_RATIO = (DISPLAY_WIDTH * DISPLAY_HEIGHT) ** (1/2) / IDEAL_PIXEL_COUNT
+DEFAULT_PADDING = 60 * IDEAL_PIXEL_RATIO
 
 # Set up fonts
-text_h1 = pygame.font.SysFont('Silkscreen', 75, True)
-text_h2 = pygame.font.SysFont('Silkscreen', 40)
-text_h3 = pygame.font.SysFont('Silkscreen', 30)
-text_p = pygame.font.SysFont('Open Sans', 25, True)
+text_h1 = pygame.font.SysFont('Silkscreen', int(60 * IDEAL_PIXEL_RATIO), True)
+text_h2 = pygame.font.SysFont('Silkscreen', int(40 * IDEAL_PIXEL_RATIO))
+text_h3 = pygame.font.SysFont('Silkscreen', int(30 * IDEAL_PIXEL_RATIO))
+text_p = pygame.font.SysFont('Open Sans', int(25 * IDEAL_PIXEL_RATIO), True)
 
-# Declare Constants
-CARD_HEIGHT = DISPLAYSURF.get_height() / 1.25
-CARD_WIDTH = DISPLAYSURF.get_width() / 2
-CARD_TOP_MARGIN = (DISPLAYSURF.get_height() - CARD_HEIGHT) / 2
-CARD_SIDE_MARGIN = (DISPLAYSURF.get_width() - CARD_WIDTH) / 2
+# Card Constants
+CARD_HEIGHT = DISPLAY_HEIGHT / 1.25
+CARD_WIDTH = DISPLAY_WIDTH / 2
+CARD_TOP_MARGIN = (DISPLAY_HEIGHT - CARD_HEIGHT) / 2
+CARD_SIDE_MARGIN = (DISPLAY_WIDTH - CARD_WIDTH) / 2
 
 CLOCK = pygame.time.Clock()
 NUMBER_OF_PARAMS_GAME_FILE = 9
@@ -85,17 +91,15 @@ def read_file(file):
 def display_text(text, location, level = 1, color = BLACK, character_max = 100):
 
     text_level = text_p
-    new_line = 30
 
     if level == 1:
         text_level = text_h1
-        new_line = 70
     elif level == 2:
         text_level = text_h2
-        new_line = 40
     elif level == 3:
         text_level = text_h3
-        new_line = 30
+
+    new_line = text_level.size("Tg")[1]
 
     if len(text) < character_max or character_max == 0:
         textsurface = text_level.render(text, False, color)
@@ -110,7 +114,7 @@ def display_text(text, location, level = 1, color = BLACK, character_max = 100):
 # Used and updated from PyGame documentation
 # draw some text into an area of a surface
 # automatically wraps words
-# returns any text that didn't get blitted
+# returns bottom of text as a pixel value
 def display_text_box(text, rect, color = BLACK, font = text_h1, aa=False, bkg=None, restrict = False, surface = DISPLAYSURF):
     rect = Rect(rect)
     y = rect.top
@@ -154,9 +158,6 @@ def display_text_box(text, rect, color = BLACK, font = text_h1, aa=False, bkg=No
 
     return y
 
-
-
-
 def card_display(location, width, height, color = WHITE):
 
     fill_color = (color[0], color[1], color[2], 150)
@@ -180,14 +181,12 @@ def background_update(image = True):
 
             if previous_background_link != background_link:
 
-                print("update")
-
                 try:
 
                     temp = pygame.image.load(background_link)
 
                     ratio = temp.get_width() / temp.get_height()
-                    img_width = int(DISPLAYSURF.get_width())
+                    img_width = int(DISPLAY_WIDTH)
                     img_height = int(float(img_width / ratio))
 
                     temp = pygame.transform.scale(temp, (img_width, img_height))
@@ -216,7 +215,7 @@ def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
 
     side = CARD_WIDTH / ((abs(position)/depth_scale) + 1)  # / (abs(position) + 1)
     top = CARD_HEIGHT / ((abs(position)/depth_scale) + 1)  # / (abs(position) + 1)
-    top_corner = (CARD_SIDE_MARGIN + (CARD_WIDTH + 60) * (position), (DISPLAYSURF.get_height()-top)/2)
+    top_corner = (CARD_SIDE_MARGIN + (CARD_WIDTH + DEFAULT_PADDING) * (position), (DISPLAY_HEIGHT-top)/2)
 
     if position >= -2 and position <= 2:
 
@@ -235,8 +234,8 @@ def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
 
                 bg_img = "Resources/originals/game_images/" + file[id][2]
 
-                next_line = display_text_box(file[id][0], (top_corner[0] + 80, top_corner[1] + 80, CARD_WIDTH - 160, CARD_HEIGHT -160), WHITE, text_h1) # TODO Fix text to screen ratio
-                display_text_box(file[id][1], (top_corner[0] + 80, next_line + 30, CARD_WIDTH - 160, CARD_HEIGHT - 160), WHITE, text_p, aa = True)
+                next_line = display_text_box(file[id][0], (top_corner[0] + DEFAULT_PADDING, top_corner[1] + DEFAULT_PADDING, CARD_WIDTH - DEFAULT_PADDING*2, CARD_HEIGHT - DEFAULT_PADDING*2), WHITE, text_h1)
+                display_text_box(file[id][1], (top_corner[0] + DEFAULT_PADDING, next_line + DEFAULT_PADDING/2, CARD_WIDTH - DEFAULT_PADDING*2, CARD_HEIGHT - DEFAULT_PADDING*2), WHITE, text_p, aa = True)
 
             else:
 
@@ -244,7 +243,7 @@ def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
 
                 bg_img = None
 
-                next_line = display_text("Error - Unspecified", (top_corner[0] + 60, top_corner[1] + 60), 2, WHITE, int(CARD_WIDTH / 45))  # TODO Fix text to screen ratio
+                next_line = display_text("Error - Unspecified", (top_corner[0] + DEFAULT_PADDING, top_corner[1] + DEFAULT_PADDING), 2, WHITE, int(CARD_WIDTH / 45))
                 display_text("Card type not specified. Please check code to ensure correct type is specified without typo.", (top_corner[0] + 60, top_corner[1] + 130 * next_line), 4, WHITE, int(CARD_WIDTH / 11))
 
 
