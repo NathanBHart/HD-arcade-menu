@@ -14,3 +14,4 @@
 
 ### Feb 24th 2021
  - Pre-Alpha v2: Fixed background loader... It is much more efficient now! It can load in and run larger files with (relative) ease, but it is still recommended to file sizes that are not greater than 1MB and have a 4:3 ratio, if possible. I might want to fix the loader to adjust based on resolution so it can scale best for any display type.
+ - Pre-Alpha v2.1: Updated the text function so it is more effective, breaks between words (unless too small), fits within a rectangle (text box) so it is more responsive.
