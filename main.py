@@ -189,7 +189,7 @@ while main_loop:
 
         try:
 
-            if scaled_backgound_image == None:
+            if scaled_backgound_image == None: ##TODO fix bug so it doesn't render every frame and only at change
 
                 background_image = pygame.image.load(background)
 
