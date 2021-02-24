@@ -1,4 +1,4 @@
-# HD_arcade_menu
+# HD Arcade Menu
  This is the menu for the game systems we are making for HDCH
 
 ## Logs:
