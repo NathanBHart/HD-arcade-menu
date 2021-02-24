@@ -5,8 +5,6 @@ import math
 pygame.init()
 pygame.font.init()
 
-
-
 DISPLAYSURF = pygame.display.set_mode((0,0), FULLSCREEN)
 
 # Set up fonts
@@ -26,8 +24,9 @@ NUMBER_OF_PARAMS_GAME_FILE = 9
 ORIGINALS = "Resources/originals/original_games.txt"
 
 # Declare variables
-background = None
-scaled_backgound_image = None
+background_link = None
+previous_background_link = None
+scaled_background_image = None
 
 # Set Color Constants
 BLACK = (0, 0, 0)
@@ -83,7 +82,6 @@ def read_file(file):
 
     return x
 
-
 def display_text(text, location, level = 1, color = BLACK, character_max = 50):
 
     text_level = text_p
@@ -122,10 +120,49 @@ def image_display(image, location = (0,0), alpha = 255):
     edit.set_alpha(alpha)
     DISPLAYSURF.blit(edit, location)
 
+def background_update(image = True):
+
+    global background_link, previous_background_link, scaled_background_image
+
+    if image:
+
+        if background_link != None:
+
+            if previous_background_link != background_link:
+
+                print("update")
+
+                try:
+
+                    temp = pygame.image.load(background_link)
+
+                    ratio = temp.get_width() / temp.get_height()
+                    img_width = int(DISPLAYSURF.get_width())
+                    img_height = int(float(img_width / ratio))
+
+                    temp = pygame.transform.scale(temp, (img_width, img_height))
+                    temp.set_alpha(100)
+
+                    scaled_background_image = temp
+
+                    DISPLAYSURF.blit(temp, (0, 0))
+
+                    previous_background_link = background_link
+
+                except:
+
+                    display_text("Error Loading Background Image", (0, 0), 3, RED)
+                    display_text("Check code for typo or check for missing or changed file", (0, 30), 4, RED)
+
+            else:
+
+                DISPLAYSURF.blit(scaled_background_image, (0,0))
+
+
 
 def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
 
-    global background
+    global background_link
 
     side = CARD_WIDTH  # / (abs(position) + 1)
     top = CARD_HEIGHT  # / (abs(position) + 1)
@@ -173,7 +210,7 @@ def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
 
         if round(position * 2) == 0:
 
-            background = bg_img
+            background_link = bg_img
 
 
 
@@ -185,29 +222,7 @@ while main_loop:
 
     DISPLAYSURF.fill(BLACK)
 
-    if background != None:
-
-        try:
-
-            if scaled_backgound_image == None: ##TODO fix bug so it doesn't render every frame and only at change
-
-                background_image = pygame.image.load(background)
-
-                ratio = background_image.get_width()/background_image.get_height()
-                img_width = int(DISPLAYSURF.get_width())
-                img_height = int(float(img_width / ratio))
-
-                scaled_background_image = pygame.transform.scale(background_image, (img_width, img_height))
-                scaled_background_image.set_alpha(100)
-
-
-            DISPLAYSURF.blit(scaled_background_image, (0,0))
-            #image_display(scaled_background_image, 1, (0,0), 100)
-
-        except:
-
-            display_text("Error Loading Background Image", (0,0), 3, RED)
-            display_text("Check code for typo or check for missing or changed file", (0, 30), 4, RED)
+    background_update()
 
     CLOCK.tick(30)
 
