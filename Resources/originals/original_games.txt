@@ -34,3 +34,14 @@ NONE
 NONE
 1
 10
+
+-li
+Brains and Brunch
+Brains and Brunch is a podcast by Joanie and Nathan Hart. We talk about interesting topics and have a lot of fun. If you are interested in what we are interested, have a listen and rate our feed on Apple Podcasts!
+brains_and_brunch.png
+brains_and_brunch.mp3
+230, 210, 140
+NONE
+NONE
+1
+10
