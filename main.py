@@ -1,6 +1,9 @@
-import pygame # TODO document everything
+import pygame
 from pygame.locals import *
-import math
+#import math
+import controller
+import file_reader
+from file_reader import *
 
 pygame.init()
 pygame.font.init()
@@ -10,13 +13,14 @@ DISPLAYSURF = pygame.display.set_mode((0,0), FULLSCREEN)
 DISPLAY_WIDTH = DISPLAYSURF.get_width()
 DISPLAY_HEIGHT = DISPLAYSURF.get_height()
 IDEAL_PIXEL_COUNT = (1280 * 720) ** (1/2)
-IDEAL_PIXEL_RATIO = (DISPLAY_WIDTH * DISPLAY_HEIGHT) ** (1/2) / IDEAL_PIXEL_COUNT
+IDEAL_PIXEL_RATIO = 1#(DISPLAY_WIDTH * DISPLAY_HEIGHT) ** (1/2) / IDEAL_PIXEL_COUNT
 DEFAULT_PADDING = 60 * IDEAL_PIXEL_RATIO
 
 # Set up fonts
-text_h1 = pygame.font.SysFont('Silkscreen', int(60 * IDEAL_PIXEL_RATIO), True)
-text_h2 = pygame.font.SysFont('Silkscreen', int(40 * IDEAL_PIXEL_RATIO))
-text_h3 = pygame.font.SysFont('Silkscreen', int(30 * IDEAL_PIXEL_RATIO))
+text_huge = pygame.font.SysFont('Silkscreen', int(110 * IDEAL_PIXEL_RATIO), True)
+text_h1 = pygame.font.SysFont('Silkscreen', 60, True)
+text_h2 = pygame.font.SysFont('Silkscreen', int(30 * IDEAL_PIXEL_RATIO))
+text_h3 = pygame.font.SysFont('Silkscreen', int(20 * IDEAL_PIXEL_RATIO))
 text_p = pygame.font.SysFont('Open Sans', int(25 * IDEAL_PIXEL_RATIO), True)
 
 # Card Constants
@@ -24,11 +28,10 @@ CARD_HEIGHT = DISPLAY_HEIGHT / 1.25
 CARD_WIDTH = DISPLAY_WIDTH / 2
 CARD_TOP_MARGIN = (DISPLAY_HEIGHT - CARD_HEIGHT) / 2
 CARD_SIDE_MARGIN = (DISPLAY_WIDTH - CARD_WIDTH) / 2
+DEPTH_SCALE = 5
 
 CLOCK = pygame.time.Clock()
-NUMBER_OF_PARAMS_GAME_FILE = 9
-ORIGINALS = "Resources/originals/original_games.txt"
-
+FPS = 30
 # Declare variables
 background_link = None
 previous_background_link = None
@@ -39,83 +42,133 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 100, 100)
 
-def read_file(file):
+SLIDE_LEFT = -1
+SLIDE_RIGHT = 1
+ANIMATION_LERP = 2
+ANIMATION_TIME = 0.3
 
-    temp = open(file, "r")
+class MenuGroup:
 
-    f = temp.read().splitlines()
+    def __init__(self, *args):
 
-    list_item_count = 0
+        self.items = [*args]
 
-    i = 0
+    def add_to_group(self, item):
 
-    for stuff in f:
+        self.items.append(item)
 
-        if str(f[i]) == "-li":
-            list_item_count += 1
+    def display_items(self):
 
-        i += 1
+        for each in self.items:
+
+            each.display_card()
+
+    def animate_cards(self, direction: int = SLIDE_LEFT):
+
+        destinations = {}
+
+        for each in self.items:
+
+            destinations[each] = each.position + direction
+
+        reps = round(FPS * ANIMATION_TIME)
+        for i in range(reps):
+
+            DISPLAYSURF.fill(BLACK)
+            CLOCK.tick(FPS)
+
+            for each in self.items:
+
+                each.position += (destinations[each] - each.position) / ANIMATION_LERP
+                each.prepare_display()
+
+            # process inputs(events)
+            for event in pygame.event.get():
+                # close the window
+                if event.type == pygame.QUIT:
+                    main_loop = False
+                    break
+
+            menu.display_items()
+
+            pygame.display.update()
+
+        for each in self.items:
+
+            each.position = destinations[each]
+            each.prepare_display()
+
+    def load_menu_from_file(self, file = ORIGINALS):
+        read_file = file_reader.read_file(file)
 
 
-    x = [[0 for i in range(NUMBER_OF_PARAMS_GAME_FILE)] for j in range(list_item_count)]
 
-    item = 0
-    i = 0
 
-    for stuff in f:
+class Card:
 
-        if str(f[i]) == "-li":
+    def __init__(self, **kwargs):
+        self.position = kwargs["position"]
+        self.color = kwargs["color"]
+        self.size = (round(CARD_WIDTH / (abs(self.position / DEPTH_SCALE) + 1)), round(CARD_HEIGHT/ (abs(self.position / DEPTH_SCALE) + 1)))
+        self.location = ((DISPLAY_WIDTH - self.size[0]) / 2 + (CARD_WIDTH + DEFAULT_PADDING) * self.position,
+                         (DISPLAY_HEIGHT - self.size[1]) / 2)
+        #self.rect = (self.location[0], self.location[1], self.size[0], self.size[1])
 
-            scan = True
-            j = 1
-            c_type = 0
+        self.text_rect = (DEFAULT_PADDING, DEFAULT_PADDING*1.5, CARD_WIDTH - DEFAULT_PADDING*2, CARD_HEIGHT - DEFAULT_PADDING*2)
 
-            while c_type < NUMBER_OF_PARAMS_GAME_FILE:
+        self.original_display = pygame.image.load("resources/menu_ui/menu_card.png")
+        self.original_display.fill((self.color[0], self.color[1], self.color[2], 100), special_flags=pygame.BLEND_MULT)
+        self.original_display = pygame.transform.scale(self.original_display, (round(CARD_WIDTH),round(CARD_HEIGHT)))
 
-                if str(f[i + j])[0] != "#" or str(f[i + j]) != "NONE":
+        self.display = pygame.transform.scale(self.original_display, self.size)
 
-                    x[item][c_type] = f[i + j]
+    def display_card(self):
 
-                    c_type += 1
+        DISPLAYSURF.blit(self.display, self.location)
 
-                j += 1
+    def prepare_display(self):
 
-            item += 1
+        self.size = (round(CARD_WIDTH / (abs(self.position / DEPTH_SCALE) + 1)),
+                     round(CARD_HEIGHT / (abs(self.position / DEPTH_SCALE) + 1)))
+        self.location = ((DISPLAY_WIDTH - self.size[0]) / 2 + (CARD_WIDTH + DEFAULT_PADDING) * self.position,
+                         (DISPLAY_HEIGHT - self.size[1]) / 2)
+        #self.rect = (self.size[0], self.size[1], self.location[0], self.location[1])
+        #self.text_rect = (DEFAULT_PADDING, DEFAULT_PADDING, self.size[0] - DEFAULT_PADDING * 2, self.size[1] - DEFAULT_PADDING * 2)
+        self.display = pygame.transform.scale(self.original_display, self.size)
 
-        i += 1
+class PrimaryMenuCard(Card):
 
-    temp.close()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.title = kwargs["title"]
+        display_text_box(self.title, self.text_rect, WHITE, text_huge, centered=True, surface=self.original_display)
+        self.prepare_display()
 
-    return x
+class GameMenuCard(Card):
 
-def display_text(text, location, level = 1, color = BLACK, character_max = 100):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.title = kwargs["title"]
+        next_line = display_text_box(self.title, self.text_rect, WHITE, text_huge, centered= True, surface=self.original_display)
+        x = self.text_rect
+        self.text_rect = (x[0] + 10, x[1] + next_line + DEFAULT_PADDING, x[2] - 20, x[3] - next_line)
 
-    text_level = text_p
+        self.description = kwargs["description"]
+        display_text_box(self.description, self.text_rect, WHITE, text_p, centered = True, aa=True, surface=self.original_display)
 
-    if level == 1:
-        text_level = text_h1
-    elif level == 2:
-        text_level = text_h2
-    elif level == 3:
-        text_level = text_h3
-
-    new_line = text_level.size("Tg")[1]
-
-    if len(text) < character_max or character_max == 0:
-        textsurface = text_level.render(text, False, color)
-        DISPLAYSURF.blit(textsurface, location)
-    else:
-        for i in range(int(math.ceil(len(text)/character_max))):
-            textsurface = text_level.render(text[i*character_max:(i+1)*character_max], False, color) # TODO Add feature to break line at end of word
-            DISPLAYSURF.blit(textsurface, (location[0], location[1] + new_line * i))
-
-    return int(math.ceil(len(text)/character_max))
+'''        self.background_image = kwargs["background image"]
+        self.music = kwargs["music"]
+        self.color = kwargs["color"]
+        self.number_of_players = kwargs["number of players"]
+        self.completion_time = kwargs["completion time"]
+        self.game_file = kwargs["game file"]
+        self.hi_score_file = kwargs["hi score file"]'''
 
 # Used and updated from PyGame documentation
 # draw some text into an area of a surface
 # automatically wraps words
 # returns bottom of text as a pixel value
-def display_text_box(text, rect, color = BLACK, font = text_h1, aa=False, bkg=None, restrict = False, surface = DISPLAYSURF):
+def display_text_box(text, rect, color = BLACK, font = text_h1, aa=False, centered = False, restrict = False, surface = DISPLAYSURF):
     rect = Rect(rect)
     y = rect.top
     line_spacing = -2
@@ -144,143 +197,49 @@ def display_text_box(text, rect, color = BLACK, font = text_h1, aa=False, bkg=No
                     i = j + 1
 
         # render the line and blit it to the surface
-        if bkg:
-            image = font.render(text[:i], 1, color, bkg)
-            image.set_colorkey(bkg)
-        else:
-            image = font.render(text[:i], aa, color)
+        image = font.render(text[:i], aa, color)
 
-        surface.blit(image, (rect.left, y))
+        if centered:
+            surface.blit(image, (rect.left + (rect.width - image.get_width())/2, y))
+        else:
+            surface.blit(image, (rect.left, y))
         y += font_height + line_spacing
 
         # remove the text we just blitted
         text = text[i:]
 
+    y -= font_height + line_spacing
+
     return y
 
-def card_display(location, width, height, color = WHITE):
+menu_item = PrimaryMenuCard(position=0, color= RED, title="HD Originals")
+menu_item2 = PrimaryMenuCard(position=1, color= (200, 235, 255), title="Minigames")
+menu_item3 = PrimaryMenuCard(position=-1, color= (200, 255, 235), title="Classics")
+menu_item4 = GameMenuCard(position=2, color=WHITE, title = "HD Game Lab", description="Welcome to the HD Game Lab, the game development community for HDCH. This discord server is designed to be a resource to you, so feel free to participate and contribute as much as you want.")
 
-    fill_color = (color[0], color[1], color[2], 150)
-
-    s = pygame.Surface((width, height), pygame.SRCALPHA)  # per-pixel alpha
-    s.fill(fill_color)  # notice the alpha value in the color
-    DISPLAYSURF.blit(s, location)
-
-def image_display(image, location = (0,0), alpha = 255):
-    edit = image
-    edit.set_alpha(alpha)
-    DISPLAYSURF.blit(edit, location)
-
-def background_update(image = True):
-
-    global background_link, previous_background_link, scaled_background_image
-
-    if image:
-
-        if background_link != None:
-
-            if previous_background_link != background_link:
-
-                try:
-
-                    temp = pygame.image.load(background_link)
-
-                    ratio = temp.get_width() / temp.get_height()
-                    img_width = int(DISPLAY_WIDTH)
-                    img_height = int(float(img_width / ratio))
-
-                    temp = pygame.transform.scale(temp, (img_width, img_height))
-                    temp.set_alpha(100)
-
-                    scaled_background_image = temp
-
-                    DISPLAYSURF.blit(temp, (0, 0))
-
-                    previous_background_link = background_link
-
-                except:
-
-                    display_text("Error Loading Background Image", (0, 0), 3, RED)
-                    display_text("Check code for typo or check for missing or changed file", (0, 30), 4, RED)
-
-            else:
-
-                DISPLAYSURF.blit(scaled_background_image, (0,0))
-
-def menu_card(type = "Blank", position = 0, id = 0, color = WHITE):
-
-    global background_link
-
-    depth_scale = 10
-
-    side = CARD_WIDTH / ((abs(position)/depth_scale) + 1)  # / (abs(position) + 1)
-    top = CARD_HEIGHT / ((abs(position)/depth_scale) + 1)  # / (abs(position) + 1)
-    top_corner = (CARD_SIDE_MARGIN + (CARD_WIDTH + DEFAULT_PADDING) * (position), (DISPLAY_HEIGHT-top)/2)
-
-    if position >= -2 and position <= 2:
-
-        try:
-
-            if type == "Original_Game":
-                file = read_file(ORIGINALS)
-            else:
-                file = read_file("Resources/card_exception")
-
-            if type == "Original_Game":
-
-                #print(file[id])
-
-                card_display(top_corner, side, top, tuple(map(int, file[id][4].split(', '))))
-
-                bg_img = "Resources/originals/game_images/" + file[id][2]
-
-                next_line = display_text_box(file[id][0], (top_corner[0] + DEFAULT_PADDING, top_corner[1] + DEFAULT_PADDING, CARD_WIDTH - DEFAULT_PADDING*2, CARD_HEIGHT - DEFAULT_PADDING*2), WHITE, text_h1)
-                display_text_box(file[id][1], (top_corner[0] + DEFAULT_PADDING, next_line + DEFAULT_PADDING/2, CARD_WIDTH - DEFAULT_PADDING*2, CARD_HEIGHT - DEFAULT_PADDING*2), WHITE, text_p, aa = True)
-
-            else:
-
-                card_display(top_corner, side, top, (255, 100, 100))
-
-                bg_img = None
-
-                next_line = display_text("Error - Unspecified", (top_corner[0] + DEFAULT_PADDING, top_corner[1] + DEFAULT_PADDING), 2, WHITE, int(CARD_WIDTH / 45))
-                display_text("Card type not specified. Please check code to ensure correct type is specified without typo.", (top_corner[0] + 60, top_corner[1] + 130 * next_line), 4, WHITE, int(CARD_WIDTH / 11))
-
-
-        except:
-
-            card_display(top_corner, side, top, (255, 50, 50))
-
-            bg_img = None
-
-            next_line = display_text("Error", (top_corner[0] + 60, top_corner[1] + 60), 1, (255, 200, 200), int(CARD_WIDTH / 45))
-            display_text("Error with displaying card. Check code and source file. Type argument was: " + str(type)
-                        + " and an id of: " + str(id) + ". Check file and code.", (top_corner[0] + 60, top_corner[1] + 130 * next_line), 4, (255, 200, 200), int(CARD_WIDTH / 11))
-
-        if round(position * 2) == 0:
-
-            background_link = bg_img
-
-
+menu = MenuGroup(menu_item, menu_item2, menu_item3, menu_item4)
 
 main_loop = True
 
-i = 0
+console_control = controller.Controller(0)
 
 while main_loop:
 
     DISPLAYSURF.fill(BLACK)
+    CLOCK.tick(FPS)
 
-    background_update()
-
-    CLOCK.tick(30)
-
+    # process inputs(events)
     for event in pygame.event.get():
-        if event.type == QUIT:
+        # close the window
+        if event.type == pygame.QUIT:
             main_loop = False
 
-    menu_card("Original_Game", 0, 0)
-    menu_card("Original_Game", 2, 0)
-    menu_card("Original_Game", 1, 1)
+    menu.display_items()
+
+    if console_control.get_x_axis() == 1 or pygame.key.get_pressed()[K_RIGHT]:
+        menu.animate_cards(SLIDE_LEFT)
+
+    if console_control.get_x_axis() == -1 or pygame.key.get_pressed()[K_LEFT]:
+        menu.animate_cards(SLIDE_RIGHT)
 
     pygame.display.update()
