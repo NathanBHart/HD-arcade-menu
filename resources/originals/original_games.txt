@@ -2,8 +2,8 @@
 #	-li
 #	Game Name
 #	Game Description (one line)
-#	Background Image File (naming convention: use game name like "game_name.png". Store in "game_images" folder
-#	Theme Music File (same as above. Store in game_menu_music folder)
+#	Link to Background Image File (naming convention: use game name like "game_name.png". Store in "game_images" folder (link from root)
+#	Link to Theme Music File (same as above. Store in game_menu_music folder) (link from root)
 #	Game Accent Color (use a three part tuple: x, y, z. Do not use parenthesis. Use brigher colors if possible (or white)
 #	Link To Game File
 #	Link To Highscore File
@@ -16,8 +16,8 @@
 -li
 HD Game Lab
 Welcome to the HD Game Lab, the game development community for HDCH. This discord server is designed to be a resource to you, so feel free to participate and contribute as much as you want.
-hd_game_lab.png
-hd_game_lab.mp3
+resources/originals/game_images/hd_game_lab.png
+resources/originals/game_menu_music/hd_game_lab.mp3
 180, 220, 255
 NONE
 NONE
@@ -27,8 +27,8 @@ NONE
 -li
 Brains and Brunch
 Brains and Brunch is a podcast by Joanie and Nathan Hart. We talk about interesting topics and have a lot of fun. If you are interested in what we are interested, have a listen and rate our feed on Apple Podcasts!
-brains_and_brunch.png
-brains_and_brunch.mp3
+resources/originals/game_images/brains_and_brunch.png
+resources/originals/game_menu_music/brains_and_brunch.mp3
 230, 210, 140
 NONE
 NONE
@@ -38,8 +38,8 @@ NONE
 -li
 Brains and Brunch
 Brains and Brunch is a podcast by Joanie and Nathan Hart. We talk about interesting topics and have a lot of fun. If you are interested in what we are interested, have a listen and rate our feed on Apple Podcasts!
-brains_and_brunch.png
-brains_and_brunch.mp3
+resources/originals/game_images/hd_game_lab.png
+resources/originals/game_menu_music/brains_and_brunch.mp3
 230, 210, 140
 NONE
 NONE
