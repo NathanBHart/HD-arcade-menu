@@ -3,6 +3,8 @@ from enum import Enum
 
 NUMBER_OF_PARAMS_GAME_FILE = 9
 ORIGINALS = "resources/originals/original_games.txt"
+CLASSICS = "resources/classics/classic_games.txt"
+MINIGAMES = "resources/minigames/minigames.text"
 
 class Properties(Enum):
 
@@ -19,49 +21,57 @@ class Properties(Enum):
 
 def read_file(file):
 
-    temp = open(file, "r")
+    try:
 
-    f = temp.read().splitlines()
+        temp = open(file, "r")
 
-    list_item_count = 0
+        f = temp.read().splitlines()
 
-    i = 0
+        list_item_count = 0
 
-    for stuff in f:
+        i = 0
 
-        if str(f[i]) == "-li":
-            list_item_count += 1
+        for stuff in f:
 
-        i += 1
+            if str(f[i]) == "-li":
+                list_item_count += 1
+
+            i += 1
 
 
-    x = [{} for j in range(list_item_count)]
+        x = [{} for j in range(list_item_count)]
 
-    item = 0
-    i = 0
+        item = 0
+        i = 0
 
-    for stuff in f:
+        for stuff in f:
 
-        if str(f[i]) == "-li":
+            if str(f[i]) == "-li":
 
-            scan = True
-            j = 1
-            c_type: int = 0
+                scan = True
+                j = 1
+                c_type: int = 0
 
-            while c_type < NUMBER_OF_PARAMS_GAME_FILE:
+                while c_type < NUMBER_OF_PARAMS_GAME_FILE:
 
-                if str(f[i + j])[0] != "#" or str(f[i + j]) != "NONE":
+                    if str(f[i + j])[0] != "#" or str(f[i + j]) != "NONE": #TODO: Fix this?
 
-                    x[item][Properties(c_type).name] = (f[i + j])
+                        x[item][Properties(c_type).name] = (f[i + j])
 
-                    c_type += 1
+                        c_type += 1
 
-                j += 1
+                    j += 1
 
-            item += 1
+                item += 1
 
-        i += 1
+            i += 1
 
-    temp.close()
+        temp.close()
 
-    return x
+        return x
+
+    except FileNotFoundError:
+
+        print("file_readyer.py: No such file exists. Unable to load file.")
+
+        return []

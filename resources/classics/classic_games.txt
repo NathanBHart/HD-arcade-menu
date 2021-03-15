@@ -1,0 +1,41 @@
+# Organization:
+#	-li
+#	Game Name
+#	Game Description (one line)
+#	Link to Background Image File (naming convention: use game name like "game_name.png". Store in "game_images" folder (link from root)
+#	Link to Theme Music File (same as above. Store in game_menu_music folder) (link from root)
+#	Game Accent Color (use a three part tuple: x, y, z. Do not use parenthesis. Use brigher colors if possible (or white)
+#	Link To Game File
+#	Link To Highscore File
+#   Number of Players (1 or 2) written as an int
+#   Time in minutes (as an int) it will take to play
+#	Notes:
+#	    Only lines following -li are read. ALL 6 lines below a /li WILL BE READ AND USED. If nothing is present, just
+#       Write NONE. The program will automatically handle the exception in most cases.
+#       As of now (march 14th 2021) colors must be added and correctly in order for a card to be loaded.
+#           '--> Hopefully later, if a color is not specified, a standard color can be used (e.g. WHITE).
+#       ALWAYS INCLUDE THE FILE EXTENSION!
+
+-- ADD LIST ITEMS BELOW USING '-li' and following with each parameter. --
+
+-li
+Space Invaders
+The aliens are invading from space! You must defend against them in this recreation of the classic Arcade Game
+resources/classics/game_images/space_invaders.png
+resources/classics/game_menu_music/space_invaders.mp3
+50, 255, 50
+NONE
+NONE
+1
+5
+
+-li
+Pong
+Pong was one of the first video games ever made. Defeat your opponent in this recreation of the retro table-tennis simulator!
+resources/classics/game_images/pong.png
+resources/classics/game_menu_music/space_invaders.mp3
+220, 220, 255
+NONE
+NONE
+2
+20

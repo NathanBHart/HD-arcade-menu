@@ -10,8 +10,14 @@
 #   Number of Players (1 or 2) written as an int
 #   Time in minutes (as an int) it will take to play
 #	Notes:
-#	    Lines as the first character will not be read and skipped regardless. All 6 lines below a /li will be read and used, unless denoted by a #.
-#	    If NONE is written in place of missing content, the program can best handle the exception.
+#	    Only lines following -li are read. ALL 6 lines below a /li WILL BE READ AND USED. If nothing is present, just
+#       Write NONE. The program will automatically handle the exception in most cases.
+#       As of now (march 14th 2021) colors must be added and correctly in order for a card to be loaded.
+#           '--> Hopefully later, if a color is not specified, a standard color can be used (e.g. WHITE).
+#       ALWAYS INCLUDE THE FILE EXTENSION!
+#       For file names, use forward slashes, not backslashes.
+
+-- ADD LIST ITEMS BELOW USING '-li' and following with each parameter. --
 
 -li
 HD Game Lab
@@ -19,7 +25,7 @@ Welcome to the HD Game Lab, the game development community for HDCH. This discor
 resources/originals/game_images/hd_game_lab.png
 resources/originals/game_menu_music/hd_game_lab.mp3
 180, 220, 255
-NONE
+C:/Program Files/Internet Explorer/iexplore.exe
 NONE
 2
 20
@@ -30,18 +36,29 @@ Brains and Brunch is a podcast by Joanie and Nathan Hart. We talk about interest
 resources/originals/game_images/brains_and_brunch.png
 resources/originals/game_menu_music/brains_and_brunch.mp3
 230, 210, 140
-NONE
+C:/Program Files/Google/Chrome/Application/chrome.exe
 NONE
 1
 10
 
 -li
-Brains and Brunch
-Brains and Brunch is a podcast by Joanie and Nathan Hart. We talk about interesting topics and have a lot of fun. If you are interested in what we are interested, have a listen and rate our feed on Apple Podcasts!
-resources/originals/game_images/hd_game_lab.png
-resources/originals/game_menu_music/brains_and_brunch.mp3
-230, 210, 140
+HDCH Water Walkathon 2018
+The HDCH Water Walkathon is a fundraiser for water projects around the world! To learn more about this campaign, ask a member of the WATCH Team to see how you can get involved!
+resources/originals/game_images/hdch_water_walkathon_2018.jpg
+resources/originals/game_menu_music/hdch_water_walkathon_2018.mp3
+100, 200, 180
 NONE
 NONE
-1
-10
+2
+5
+
+-li
+HDCH Water Walkathon 2018
+The HDCH Water Walkathon is a fundraiser for water projects around the world! To learn more about this campaign, ask a member of the WATCH Team to see how you can get involved!
+resources/originals/game_images/hdch_water_walkathon_2018.jpg
+resources/originals/game_menu_music/hdch_water_walkathon_2018.mp3
+255, 100, 180
+NONE
+NONE
+2
+5
