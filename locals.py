@@ -4,6 +4,7 @@
 
 import pygame
 from pygame.locals import *
+from controller import *
 
 # Initialize fonts
 pygame.font.init()
@@ -48,3 +49,9 @@ SLIDE_LEFT = -1
 SLIDE_RIGHT = 1
 ANIMATION_LERP = 2
 ANIMATION_TIME = 0.4
+
+# Run:
+main_loop = True
+
+# Controller
+console_control = Controller(0)
