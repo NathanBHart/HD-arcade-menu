@@ -23,7 +23,7 @@ Space Invaders
 The aliens are invading from space! You must defend against them in this recreation of the classic Arcade Game
 resources/classics/game_images/space_invaders.png
 resources/classics/game_menu_music/space_invaders.mp3
-50, 255, 50
+50, 250, 50
 NONE
 NONE
 1

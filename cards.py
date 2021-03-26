@@ -66,7 +66,11 @@ class MenuGroup:
     def display_items(self):
 
         # First, the current background is blitted onto the main screen.
-        DISPLAYSURF.blit(self.background, (0, 0))
+        location = (
+            DISPLAY_WIDTH / 2 - self.background.get_width() / 2,
+            DISPLAY_HEIGHT / 2 - self.background.get_height() / 2
+        )
+        DISPLAYSURF.blit(self.background, location)
 
         # Then, if the list is not empty, items will be displayed in the list.
         if self.items != []:
@@ -80,12 +84,56 @@ class MenuGroup:
                 self.items[j % len(self.items)].display_card(j)
                 # Modulo is used to loop the counting back around if the list length is exceeded by the index.
 
-        # TODO: Fix this
-        pygame.draw.rect(DISPLAYSURF, (0, 0, 0), (
-        0, DISPLAY_HEIGHT / 2 + CARD_HEIGHT / 2, DISPLAY_WIDTH, text_p.size("Tg")[0] + 10 * IDEAL_PIXEL_RATIO))
-        # pygame.surface.Surface()
-        display_text_box("Press (A) to Select", (0, DISPLAY_HEIGHT / 2 + CARD_HEIGHT / 2, DISPLAY_WIDTH, 100), WHITE,
-                         text_p, True, centered=True)
+            # TODO: Fix this
+
+            # Color is pulled from currently selected cards
+            color = self.items[0].color
+
+            # Contrast is checked and text is either white or black depending on which is more readable.
+            if (color[0] * color[1] * color[2]) < (256 ** 3 / 2):
+                if color[0] > 230 or color[1] > 190:
+                    text_color = BLACK
+                else:
+                    text_color = WHITE
+            else:
+                text_color = BLACK
+
+            text = "Press (A) to Select"
+            padding = 10 * IDEAL_PIXEL_RATIO
+
+            rect = (
+                DISPLAY_WIDTH / 2 - text_p.size(text)[0] / 2,
+                DISPLAY_HEIGHT / 2 + CARD_HEIGHT / 2,
+                text_p.size(text)[0],
+                text_p.size("Tg")[1],
+            )
+
+            pygame.draw.rect(
+                DISPLAYSURF,
+                color,
+                (rect[0] - padding, rect[1] - padding, rect[2] + padding * 2, rect[3] + padding * 2)
+            )
+
+            display_text_box(text, rect, text_color, text_p, True, centered=True)
+
+            if type(self.items[0]) == GameMenuCard:
+                text = "Press (B) to Return to Main Menu"
+                padding = 10 * IDEAL_PIXEL_RATIO
+
+                rect = (
+                    25 * IDEAL_PIXEL_RATIO,
+                    25 * IDEAL_PIXEL_RATIO,
+                    text_p.size(text)[0],
+                    text_p.size("Tg")[1],
+                )
+
+                pygame.draw.rect(
+                    DISPLAYSURF,
+                    text_color,
+                    (rect[0] - padding, rect[1] - padding, rect[2] + padding * 2, rect[3] + padding * 2)
+                )
+
+                display_text_box(text, rect, color, text_p, True, centered=True)
 
     # A function to animate the cards moving in a direction (use the direction constants given!)
     def animate_cards(self, direction_const: int):
@@ -153,7 +201,11 @@ class MenuGroup:
                     self.play_music(new_music)
 
             # Add the background to the display at a fixed point before displaying the moved cards.
-            DISPLAYSURF.blit(self.background, (0, 0))
+            location = (
+                DISPLAY_WIDTH / 2 - self.background.get_width() / 2,
+                DISPLAY_HEIGHT / 2 - self.background.get_height() / 2
+            )
+            DISPLAYSURF.blit(self.background, location)
 
             # Shift changes each time to lerp towards the direction value. This is used to display each of the cards,
             # But shifted over somewhat.
@@ -212,6 +264,14 @@ class MenuGroup:
     # A function to reset the items and load in a new set of cards based on the file provided. This will be used mostly
     # For the ORIGINALS, CLASSICS, and MINIGAMES files.
     def load_menu_from_file(self, file=ORIGINALS):
+
+        # Fill with black loading screen while menu loads (Indicates something is changing, so user does not press
+        # Button again
+        DISPLAYSURF.fill(BLACK)
+        display_text_box("Loading...", (DEFAULT_PADDING, DEFAULT_PADDING, DISPLAY_HEIGHT, DISPLAY_WIDTH), WHITE,
+                         text_huge, aa=True)
+        pygame.display.update()
+
         # Stop any currently playing music
         pygame.mixer.music.stop()
 
@@ -260,6 +320,14 @@ class MenuGroup:
     # A function to load in the three top-level menu options (HD Originals, Classics, and Minigames).
     def load_primary_menu(self):
 
+        # Fill with black loading screen while menu loads (Indicates something is changing, so user does not press
+        # Button again
+        DISPLAYSURF.fill(BLACK)
+        display_text_box("Loading...", (DEFAULT_PADDING, DEFAULT_PADDING, DISPLAY_HEIGHT, DISPLAY_WIDTH), WHITE,
+                         text_huge, aa=True)
+        pygame.display.update()
+
+        # Stop any music that is playing
         pygame.mixer.music.stop()
 
         # Reset the menu list.
@@ -283,6 +351,12 @@ class MenuGroup:
         # Get the x_axis input from the controller
         x_input = controller_object.get_x_axis()
 
+        keys = pygame.key.get_pressed()
+        key_x_input = int(keys[K_RIGHT]) - int(keys[K_LEFT])
+
+        if key_x_input != 0:
+            x_input = key_x_input
+
         # If the x_input is not nothing (it will either be -1 or 1)
         if x_input != 0:
             # Animate the card in the inverse direction of the controller
@@ -296,13 +370,13 @@ class MenuGroup:
             card = None
 
             # If there are no cards, escape back to the main menu by pressing "b"
-            if controller_object.is_button_just_pressed("b"):
+            if controller_object.is_button_just_pressed("b") or keys[K_b]:
                 self.load_primary_menu()
 
         # If the card is a primary menu card, then do this
         if type(card) == PrimaryMenuCard:
 
-            if controller_object.is_button_just_pressed("a"):
+            if controller_object.is_button_just_pressed("a") or keys[K_a]:
 
                 if card.type == 0:
 
@@ -319,10 +393,10 @@ class MenuGroup:
         # If the card is a game menu card, then do this
         elif type(card) == GameMenuCard:
 
-            if controller_object.is_button_just_pressed("b"):
+            if controller_object.is_button_just_pressed("b") or keys[K_b]:
                 self.load_primary_menu()
 
-            if controller_object.is_button_just_pressed("a"):
+            if controller_object.is_button_just_pressed("a") or keys[K_a]:
 
                 try:
                     Popen(card.game_file)
@@ -394,6 +468,17 @@ class Card:
             (self.color[0], self.color[1], self.color[2], 255),
             special_flags=pygame.BLEND_MULT
         )
+        ratio = self.background.get_width() / self.background.get_height()
+        screen_ratio = DISPLAY_WIDTH / DISPLAY_HEIGHT
+
+        if screen_ratio >= ratio:
+            img_width = int(DISPLAY_WIDTH)
+            img_height = int(float(img_width / ratio))
+        else:
+            img_height = int(DISPLAY_HEIGHT)
+            img_width = int(img_height * ratio)
+
+        self.background = pygame.transform.scale(self.background, (img_width, img_height))
 
     # A function to blit the card to the screen at a particular location. First, if the specified position is different
     # then the internal position is updated to match, the card is prepared (another method) and it is blitted.
@@ -439,8 +524,14 @@ class Card:
             self.background = pygame.image.load(link)
 
             ratio = self.background.get_width() / self.background.get_height()
-            img_width = int(DISPLAY_WIDTH)
-            img_height = int(float(img_width / ratio))
+            screen_ratio = DISPLAY_WIDTH / DISPLAY_HEIGHT
+
+            if screen_ratio >= ratio:
+                img_width = int(DISPLAY_WIDTH)
+                img_height = int(float(img_width / ratio))
+            else:
+                img_height = int(DISPLAY_HEIGHT)
+                img_width = int(img_height * ratio)
 
             self.background = pygame.transform.scale(self.background, (img_width, img_height))
 
@@ -453,6 +544,7 @@ class Card:
             print("Background.change: Error, invalid type entered!")
 
 
+# A class for the main menu cards.
 class PrimaryMenuCard(Card):
 
     # Primary menu card has a unique property called type, which just indicates what the card is
@@ -466,7 +558,10 @@ class PrimaryMenuCard(Card):
             title_image = pygame.image.load("resources/menu_ui/hd_originals_card.png")
             title_image = pygame.transform.scale(title_image, (round(CARD_WIDTH), round(CARD_WIDTH)))
 
-            location = (30 * IDEAL_PIXEL_RATIO, 20 * IDEAL_PIXEL_RATIO)
+            location = (
+                    CARD_WIDTH/2 - title_image.get_width()/2 + 30 * IDEAL_PIXEL_RATIO,
+                    CARD_HEIGHT/2 - title_image.get_height()/2 + 20 * IDEAL_PIXEL_RATIO
+            )
 
             self.original_display.blit(title_image, location)
 
@@ -475,7 +570,10 @@ class PrimaryMenuCard(Card):
             title_image = pygame.image.load("resources/menu_ui/classic_games_card.png")
             title_image = pygame.transform.scale(title_image, (round(CARD_WIDTH), round(CARD_WIDTH)))
 
-            location = (30 * IDEAL_PIXEL_RATIO, 20 * IDEAL_PIXEL_RATIO)
+            location = (
+                CARD_WIDTH / 2 - title_image.get_width() / 2 + 30 * IDEAL_PIXEL_RATIO,
+                CARD_HEIGHT / 2 - title_image.get_height() / 2 + 20 * IDEAL_PIXEL_RATIO
+            )
 
             self.original_display.blit(title_image, location)
 
@@ -484,7 +582,10 @@ class PrimaryMenuCard(Card):
             title_image = pygame.image.load("resources/menu_ui/minigames_card.png")
             title_image = pygame.transform.scale(title_image, (round(CARD_WIDTH), round(CARD_WIDTH)))
 
-            location = (30 * IDEAL_PIXEL_RATIO, 20 * IDEAL_PIXEL_RATIO)
+            location = (
+                CARD_WIDTH / 2 - title_image.get_width() / 2 + 30 * IDEAL_PIXEL_RATIO,
+                CARD_HEIGHT / 2 - title_image.get_height() / 2 + 20 * IDEAL_PIXEL_RATIO
+            )
 
             self.original_display.blit(title_image, location)
 
@@ -497,6 +598,7 @@ class GameMenuCard(Card):
 
     def __init__(self, **kwargs):
         super().__init__(kwargs["color"])
+
         self.title = kwargs["title"]
         if len(self.title) < 15:
             text_type = text_huge
@@ -505,7 +607,7 @@ class GameMenuCard(Card):
         next_line = display_text_box(self.title, self.text_rect, WHITE, text_type, centered=True,
                                      surface=self.original_display)
         x = self.text_rect
-        self.text_rect = (x[0] + 10, x[1] + next_line + DEFAULT_PADDING / 2, x[2] - 20, x[3] - next_line)
+        self.text_rect = (x[0] + 10, x[1] + next_line, x[2] - 20, x[3] - next_line)
 
         self.description = kwargs["description"]
         display_text_box(self.description, self.text_rect, WHITE, text_p, centered=True, aa=True,
@@ -521,7 +623,94 @@ class GameMenuCard(Card):
         self.game_file = kwargs["game_file"]
         self.hi_score_file = kwargs["hi_score_file"]
 
-def display_text_box(text, rect, color = BLACK, font = text_h1, aa=False, centered = False, restrict = False, surface = DISPLAYSURF):
+        # LOAD IN THE UI ELEMENTS (This is too complex, if you are reading this, I am so sorry I did it this way.)
+
+        # A quick function to make a ui box. Two will be made, one for number of players, and one for time
+        def ui_box(text):
+            graphic = pygame.image.load("resources/menu_ui/small_card.png")
+            graphic = pygame.transform.scale(
+                graphic,
+                (round(150 * IDEAL_PIXEL_RATIO),
+                 round(150 * IDEAL_PIXEL_RATIO))
+            )
+            display_text_box(
+                text,
+                (
+                    0,
+                    round(15 * IDEAL_PIXEL_RATIO),
+                    graphic.get_width(),
+                    graphic.get_height()
+                ),
+                WHITE,
+                text_h3,
+                centered=True,
+                aa=True,
+                restrict=False,
+                surface=graphic
+            )
+
+            return graphic
+
+        # Set up player graphic (It's tedious)
+        self.players_graphic = ui_box("# Players")
+
+        player_icon = pygame.image.load("resources/menu_ui/player_icon.png")
+        player_icon = pygame.transform.scale(player_icon, (
+            round(50 * IDEAL_PIXEL_RATIO),
+            round(50 * IDEAL_PIXEL_RATIO),
+        ))
+
+        blit_y = self.players_graphic.get_height()/2 - player_icon.get_height()/2
+
+        spacing = 25 * IDEAL_PIXEL_RATIO
+
+        if self.number_of_players == 1:
+            self.players_graphic.blit(player_icon, (spacing, blit_y))
+            player_icon.fill(BLACK, special_flags=pygame.BLEND_MULT)
+            self.players_graphic.blit(player_icon, (spacing*3, blit_y))
+        elif self.number_of_players == 2:
+            self.players_graphic.blit(player_icon, (spacing, blit_y))
+            self.players_graphic.blit(player_icon, (spacing * 3, blit_y))
+
+        self.players_graphic.fill(
+            (self.color[0], self.color[1], self.color[2], 255),
+            special_flags=pygame.BLEND_MULT
+        )
+
+        self.time_graphic = ui_box("Duration")
+
+        time_icon = pygame.image.load("resources/menu_ui/timer_icon.png")
+        time_icon = pygame.transform.scale(time_icon, (
+            round(35 * IDEAL_PIXEL_RATIO),
+            round(35 * IDEAL_PIXEL_RATIO),
+        ))
+
+        blit_y = self.time_graphic.get_height() / 2 - time_icon.get_height() / 2
+
+        spacing = 20 * IDEAL_PIXEL_RATIO
+
+        self.time_graphic.blit(time_icon, (spacing, blit_y))
+
+        display_text_box(str(self.completion_time), (0, 50 * IDEAL_PIXEL_RATIO, 180 * IDEAL_PIXEL_RATIO, 50*IDEAL_PIXEL_RATIO), WHITE, text_h2, True, True, False, self.time_graphic)
+        display_text_box("min", (0, 80 * IDEAL_PIXEL_RATIO, 180 * IDEAL_PIXEL_RATIO, 80*IDEAL_PIXEL_RATIO), WHITE, text_h3, True, True, False, self.time_graphic)
+
+        self.time_graphic.fill(
+            (self.color[0], self.color[1], self.color[2], 255),
+            special_flags=pygame.BLEND_MULT
+        )
+
+    def display_card(self, relative_position: int = 0):
+        super().display_card(relative_position)
+
+        graphic_x = self.location[0] + self.size[0]/3 - self.players_graphic.get_width()/2
+        graphic_y = self.location[1] + self.size[1] - self.players_graphic.get_height() - 15 * IDEAL_PIXEL_RATIO
+
+        DISPLAYSURF.blit(self.players_graphic, (graphic_x, graphic_y))
+        graphic_x = self.location[0] + 2 * self.size[0] / 3 - self.players_graphic.get_width() / 2
+        DISPLAYSURF.blit(self.time_graphic, (graphic_x, graphic_y))
+
+
+def display_text_box(text, rect, color=BLACK, font=text_h1, aa=False, centered=False, restrict=False, surface=DISPLAYSURF):
     # Used and updated from PyGame documentation
     # draw some text into an area of a surface
     # automatically wraps words

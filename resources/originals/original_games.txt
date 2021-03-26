@@ -57,7 +57,7 @@ HDCH Water Walkathon 2018
 The HDCH Water Walkathon is a fundraiser for water projects around the world! To learn more about this campaign, ask a member of the WATCH Team to see how you can get involved!
 resources/originals/game_images/hdch_water_walkathon_2018.jpg
 resources/originals/game_menu_music/hdch_water_walkathon_2018.mp3
-255, 100, 180
+255, 199, 140
 NONE
 NONE
 2
