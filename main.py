@@ -31,9 +31,12 @@ while main_loop:
         if event.type == QUIT:
             main_loop = False
 
+    if console_control.has_input():
+        timer = 0
+
     menu.control(console_control)
 
-    if timer > 2:
+    if timer > TIMEOUT_TIMER:
         pause_screen = True
 
     if pause_screen:
@@ -59,7 +62,7 @@ while main_loop:
                     pause_screen = False
                     main_loop = False
 
-            if timer > 4:
+            if timer > SLIDE_DURATION:
 
                 if len(slides) > 0:
                     # Cycle first item to last item
@@ -70,3 +73,19 @@ while main_loop:
                     pygame.display.update()
 
                 timer = 0
+
+            if console_control.has_input():
+
+                pause_screen = False
+                menu.load_primary_menu()
+
+        timer = 0
+
+        while console_control.has_input():
+
+            CLOCK.tick(FPS)
+
+            for event in pygame.event.get():
+                # close the window
+                if event.type == QUIT:
+                    quit()

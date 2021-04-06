@@ -134,3 +134,20 @@ class Controller:
 
         else:
             return False
+
+    def has_input(self):
+
+        inputs = 0
+
+        for i in range(6):
+            inputs += self.Object.get_button(i)
+
+        if self.get_x_axis() != 0:
+            inputs = 1
+        if self.get_y_axis() != 0:
+            inputs = 1
+
+        if inputs != 0:
+            return True
+        else:
+            return False

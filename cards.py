@@ -459,6 +459,8 @@ class MenuGroup:
         # Shuffle slides in random order
         random.shuffle(slides)
 
+        self.load_primary_menu()
+
         return slides
 
 
