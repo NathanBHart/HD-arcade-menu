@@ -1,9 +1,13 @@
 # --------- IMPORT CUSTOM MODULES: ------------------------------------------------------------------------------------
-from file_reader import * # File Reader Module
-from locals import * # Note that pygame and the controller is imported through the locals module!
+from file_reader import *  # File Reader Module
+from locals import *  # Note that pygame and the controller is imported through the locals module!
+from assistant_functions import *
 
 # --------- SYSTEM MODULES:
 from subprocess import Popen
+import random
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 
@@ -400,9 +404,63 @@ class MenuGroup:
 
                 try:
                     Popen(card.game_file)
-                    exit()
+                    holding_state()
                 except FileNotFoundError:
                     print("Could not open associated file!")
+
+    def pause_screen_slides(self):
+
+        # Fill with black loading screen while menu loads (Indicates something is changing, so user does not press
+        # Button again
+        DISPLAYSURF.fill(BLACK)
+        display_text_box("Loading...", (DEFAULT_PADDING, DEFAULT_PADDING, DISPLAY_HEIGHT, DISPLAY_WIDTH), WHITE,
+                         text_huge, aa=True)
+
+        # This is probably not efficient, or anything, but frankly it's easy so here we are.
+        slides = []
+        i = 0
+
+        for file in (ORIGINALS, CLASSICS, MINIGAMES):
+
+            self.load_menu_from_file(file)
+
+            for each in self.items:
+
+                if type(each) == GameMenuCard:
+
+                    text = each.title
+
+                    slides.append(each.background)
+
+                    color = each.color
+
+                    # Contrast is checked and text is either white or black depending on which is more readable.
+                    if (color[0] * color[1] * color[2]) < (256 ** 3 / 2):
+                        if color[0] > 230 or color[1] > 190:
+                            text_color = BLACK
+                        else:
+                            text_color = WHITE
+                    else:
+                        text_color = BLACK
+
+                    rect = (
+                        DEFAULT_PADDING,
+                        DEFAULT_PADDING,
+                        DISPLAY_WIDTH - DEFAULT_PADDING * 2,
+                        DISPLAY_HEIGHT - DEFAULT_PADDING * 2
+                    )
+
+                    display_text_box(text, rect, text_color, text_huge, True, surface=slides[i], background=color)
+
+                    i += 1
+
+        random.seed()
+
+        # Shuffle slides in random order
+        random.shuffle(slides)
+
+        return slides
+
 
 
 # ----- Card:
@@ -559,8 +617,8 @@ class PrimaryMenuCard(Card):
             title_image = pygame.transform.scale(title_image, (round(CARD_WIDTH), round(CARD_WIDTH)))
 
             location = (
-                    CARD_WIDTH/2 - title_image.get_width()/2 + 30 * IDEAL_PIXEL_RATIO,
-                    CARD_HEIGHT/2 - title_image.get_height()/2 + 20 * IDEAL_PIXEL_RATIO
+                CARD_WIDTH / 2 - title_image.get_width() / 2 + 30 * IDEAL_PIXEL_RATIO,
+                CARD_HEIGHT / 2 - title_image.get_height() / 2 + 20 * IDEAL_PIXEL_RATIO
             )
 
             self.original_display.blit(title_image, location)
@@ -660,14 +718,14 @@ class GameMenuCard(Card):
             round(50 * IDEAL_PIXEL_RATIO),
         ))
 
-        blit_y = self.players_graphic.get_height()/2 - player_icon.get_height()/2
+        blit_y = self.players_graphic.get_height() / 2 - player_icon.get_height() / 2
 
         spacing = 25 * IDEAL_PIXEL_RATIO
 
         if self.number_of_players == 1:
             self.players_graphic.blit(player_icon, (spacing, blit_y))
             player_icon.fill(BLACK, special_flags=pygame.BLEND_MULT)
-            self.players_graphic.blit(player_icon, (spacing*3, blit_y))
+            self.players_graphic.blit(player_icon, (spacing * 3, blit_y))
         elif self.number_of_players == 2:
             self.players_graphic.blit(player_icon, (spacing, blit_y))
             self.players_graphic.blit(player_icon, (spacing * 3, blit_y))
@@ -691,8 +749,11 @@ class GameMenuCard(Card):
 
         self.time_graphic.blit(time_icon, (spacing, blit_y))
 
-        display_text_box(str(self.completion_time), (0, 50 * IDEAL_PIXEL_RATIO, 180 * IDEAL_PIXEL_RATIO, 50*IDEAL_PIXEL_RATIO), WHITE, text_h2, True, True, False, self.time_graphic)
-        display_text_box("min", (0, 80 * IDEAL_PIXEL_RATIO, 180 * IDEAL_PIXEL_RATIO, 80*IDEAL_PIXEL_RATIO), WHITE, text_h3, True, True, False, self.time_graphic)
+        display_text_box(str(self.completion_time),
+                         (0, 50 * IDEAL_PIXEL_RATIO, 180 * IDEAL_PIXEL_RATIO, 50 * IDEAL_PIXEL_RATIO), WHITE, text_h2,
+                         True, True, False, self.time_graphic)
+        display_text_box("min", (0, 80 * IDEAL_PIXEL_RATIO, 180 * IDEAL_PIXEL_RATIO, 80 * IDEAL_PIXEL_RATIO), WHITE,
+                         text_h3, True, True, False, self.time_graphic)
 
         self.time_graphic.fill(
             (self.color[0], self.color[1], self.color[2], 255),
@@ -702,72 +763,9 @@ class GameMenuCard(Card):
     def display_card(self, relative_position: int = 0):
         super().display_card(relative_position)
 
-        graphic_x = self.location[0] + self.size[0]/3 - self.players_graphic.get_width()/2
+        graphic_x = self.location[0] + self.size[0] / 3 - self.players_graphic.get_width() / 2
         graphic_y = self.location[1] + self.size[1] - self.players_graphic.get_height() - 15 * IDEAL_PIXEL_RATIO
 
         DISPLAYSURF.blit(self.players_graphic, (graphic_x, graphic_y))
         graphic_x = self.location[0] + 2 * self.size[0] / 3 - self.players_graphic.get_width() / 2
         DISPLAYSURF.blit(self.time_graphic, (graphic_x, graphic_y))
-
-
-def display_text_box(text, rect, color=BLACK, font=text_h1, aa=False, centered=False, restrict=False, surface=DISPLAYSURF):
-    # Used and updated from PyGame documentation
-    # draw some text into an area of a surface
-    # automatically wraps words
-    # returns bottom of text as a pixel value
-
-    rect = Rect(rect)
-    y = rect.top
-    line_spacing = -2
-
-    # get the height of the font
-    font_height = font.size("Tg")[1]
-
-    while text:
-
-        i = 1
-
-        # determine if the row of text will be outside our area
-        # Restrict allows this option to be disabled
-        if y + font_height > rect.bottom and restrict:
-            break
-
-        # determine maximum width of line
-        while font.size(text[:i])[0] < rect.width and i < len(text):
-            i += 1
-
-        # if we've wrapped the text, then adjust the wrap to the last word
-        if i < len(text):
-
-            for j in range(i):
-                if text[j] == " ":
-                    i = j + 1
-
-        # render the line and blit it to the surface
-        image = font.render(text[:i], aa, color)
-
-        if centered:
-            surface.blit(image, (rect.left + (rect.width - image.get_width())/2, y))
-        else:
-            surface.blit(image, (rect.left, y))
-        y += font_height + line_spacing
-
-        # remove the text we just blitted
-        text = text[i:]
-
-    y -= font_height + line_spacing
-
-    return y
-
-
-def get_default_background():
-
-    background = pygame.image.load("resources/menu_ui/background_default.png")
-
-    ratio = background.get_width() / background.get_height()
-    img_width = int(DISPLAY_WIDTH)
-    img_height = int(float(img_width / ratio))
-
-    background = pygame.transform.scale(background, (img_width, img_height))
-
-    return background
