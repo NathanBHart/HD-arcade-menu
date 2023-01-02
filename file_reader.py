@@ -6,7 +6,7 @@ from enum import Enum
 NUMBER_OF_PARAMS_GAME_FILE = 9
 ORIGINALS = "resources/originals/original_games.txt"
 CLASSICS = "resources/classics/classic_games.txt"
-MINIGAMES = "resources/minigames/minigames.text"
+MINIGAMES = "resources/minigames/minigames.txt"
 
 class Properties(Enum):
 
@@ -21,6 +21,8 @@ class Properties(Enum):
     number_of_players = 7
     completion_time = 8
 
+
+# Future Nathan here: You could instead just use JSON objects or CSV for this, much easier and still human-editable
 def read_file(file):
 
     try:

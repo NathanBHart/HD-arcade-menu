@@ -33,7 +33,7 @@ NONE
 Pong
 Pong was one of the first video games ever made. Defeat your opponent in this recreation of the retro table-tennis simulator!
 resources/classics/game_images/pong.png
-resources/classics/game_menu_music/space_invaders.mp3
+resources/classics/game_menu_music/cherryblossom_raptorface.mp3
 220, 220, 255
 NONE
 NONE

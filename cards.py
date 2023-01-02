@@ -404,7 +404,7 @@ class MenuGroup:
 
                 try:
                     Popen(card.game_file)
-                    holding_state()
+                    # holding_state() # TODO: Permit holding state when foreground game is running
                 except FileNotFoundError:
                     print("Could not open associated file!")
 

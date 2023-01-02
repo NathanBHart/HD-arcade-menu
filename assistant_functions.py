@@ -1,6 +1,6 @@
 from locals import *
-import win32gui
-import win32con
+#import win32gui
+#import win32con
 
 
 def display_text_box(text, rect, color=BLACK, font=text_h1, aa=False, centered=False, restrict=False,
@@ -69,6 +69,8 @@ def get_default_background():
     return background
 
 
+# Currently this does not get called
+# TODO: Fix holding_state() function
 def holding_state():
     window = win32gui.GetForegroundWindow()
 
@@ -88,6 +90,11 @@ def holding_state():
         for event in pygame.event.get():
             # close the window
             if event.type == QUIT:
+
+                # Import the global main_loop from the locals.py file
+                # There may be a better way to do this
+                global main_loop
+
                 hold = False
                 main_loop = False
 

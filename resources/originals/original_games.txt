@@ -20,44 +20,33 @@
 -- ADD LIST ITEMS BELOW USING '-li' and following with each parameter. --
 
 -li
-HD Game Lab
-Welcome to the HD Game Lab, the game development community for HDCH. This discord server is designed to be a resource to you, so feel free to participate and contribute as much as you want.
-resources/originals/game_images/hd_game_lab.png
-resources/originals/game_menu_music/hd_game_lab.mp3
+Game Item 1
+GI1 is an exhilarating competitive 2 player game. Race to the top of a crumbling tower and find the lost treasure, before the ravenous beast catches you!
+resources/originals/game_images/space_background_2.png
+resources/originals/game_menu_music/tower_edward_shallow.mp3
 180, 220, 255
-C:/Program Files/Internet Explorer/iexplore.exe
+NONE
 NONE
 2
-20
-
--li
-Brains and Brunch
-Brains and Brunch is a podcast by Joanie and Nathan Hart. We talk about interesting topics and have a lot of fun. If you are interested in what we are interested, have a listen and rate our feed on Apple Podcasts!
-resources/originals/game_images/brains_and_brunch.png
-resources/originals/game_menu_music/brains_and_brunch.mp3
-230, 210, 140
-C:/Program Files/Google/Chrome/Application/chrome.exe
-NONE
-1
 10
 
 -li
-HDCH Water Walkathon 2018
-The HDCH Water Walkathon is a fundraiser for water projects around the world! To learn more about this campaign, ask a member of the WATCH Team to see how you can get involved!
-resources/originals/game_images/hdch_water_walkathon_2018.jpg
-resources/originals/game_menu_music/hdch_water_walkathon_2018.mp3
-100, 200, 180
+Game Item 2
+Take it easy with this slow-paced solo game. Uncover the mystery of pixel manor, the abandoned estate of the Chipworth family, after their last remaining heir vanishes without a trace!
+resources/originals/game_images/space_background.png
+resources/originals/game_menu_music/merchant_edward_shallow.mp3
+230, 210, 140
 NONE
 NONE
-2
-5
+1
+25
 
 -li
-HDCH Water Walkathon 2018
-The HDCH Water Walkathon is a fundraiser for water projects around the world! To learn more about this campaign, ask a member of the WATCH Team to see how you can get involved!
-resources/originals/game_images/hdch_water_walkathon_2018.jpg
-resources/originals/game_menu_music/hdch_water_walkathon_2018.mp3
-255, 199, 140
+Game Item 3
+Blitz down the track in this fast-paced competitive racing simulator! Over 5 course to chose from, devious power-ups, AI competitors and more await you in GI3.
+resources/originals/game_images/space_background_4.png
+resources/originals/game_menu_music/cherryblossom_raptorface.mp3
+100, 200, 180
 NONE
 NONE
 2
